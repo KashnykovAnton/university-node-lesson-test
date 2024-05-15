@@ -1,5 +1,5 @@
 {
-  "name": "university-node-lesson-5",
+  "name": "university-node-lesson-test",
   "type": "module",
   "scripts": {
     "start": "node ./app.js",
