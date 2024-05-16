@@ -1,53 +1,30 @@
-import fs from "fs/promises";
-import path from "path";
-import { nanoid } from "nanoid";
+import Contact from "../models/Contact.js";
 
-const contactsPath = path.resolve("db", "contacts.json");
-const updateContacts = (contacts) => fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
-
-async function listContacts() {
-  const data = await fs.readFile(contactsPath);
-  return JSON.parse(data);
+function listContacts(search = {}) {
+  const { filter = {}, fields = "" } = search;
+  // if filter = {name: "Bob"} - will be shown objects that have in field name - "Bob"
+  // if fields = "name email" - will be shown only this fields. If fields "-name -email" - will be shown all the fields exept name and email
+  return Contact.find({ filter, fields });
 }
 
-async function getContactById(contactId) {
-  const allContacts = await listContacts();
-  return allContacts.find((item) => item.id === contactId) || null;
+async function getContactById(_id) {
+  // const result = await Contact.findOne({ _id });
+  const result = await Contact.findById({ _id });
+  return result;
 }
 
-async function removeContact(contactId) {
-  const allContacts = await listContacts();
-  const index = allContacts.findIndex((item) => item.id === contactId);
-  if (index === -1) {
-    return null;
-  }
-  const [removedContact] = allContacts.splice(index, 1);
-  await updateContacts(allContacts);
-  return removedContact;
+function removeContact(contactId) {}
+
+function addContact(data) {
+  return Contact.create(data);
 }
 
-async function addContact({ name, email, phone }) {
-  const newContact = {
-    id: nanoid(),
-    name,
-    email,
-    phone,
-  };
-  const allContacts = await listContacts();
-  allContacts.push(newContact);
-  await updateContacts(allContacts);
-  return newContact;
-}
+function updateContact(contactId, body) {}
 
-async function updateContact(contactId, body) {
-  const allContacts = await listContacts();
-  const index = allContacts.findIndex((item) => item.id === contactId);
-  if (index === -1) {
-    return null;
-  }
-  allContacts[index] = { ...allContacts[index], ...body };
-  await updateContacts(allContacts);
-  return allContacts[index];
-}
-
-export default { listContacts, getContactById, removeContact, addContact, updateContact };
+export default {
+  listContacts,
+  getContactById,
+  removeContact,
+  addContact,
+  updateContact,
+};
